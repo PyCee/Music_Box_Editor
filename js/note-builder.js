@@ -4,91 +4,178 @@ builder_interface.addEventListener("mousedown", begin_selection);
 builder_interface.addEventListener("mouseup", end_selection);
 
 const SELECTION_TYPE = {
-    CLICK: 'click',
-    DRAG: 'drag'
+    NONE: 'none',
+    SELECTED: 'selected',
+    MOVABLE: 'movable',
+    DRAG: 'drag-select'
+
 };
-var curr_selection_type = null;
+var curr_selection_type = SELECTION_TYPE.NONE;
 var selected_notes = [];
 var note_offsets = [];
+
+function set_note_offsets(top, left){
+    note_offsets = [];
+    selected_notes.forEach(function(n){
+        var offset = {
+            top: n.element.offsetTop - top,
+            left: n.element.offsetLeft - left
+        };
+        note_offsets.push(offset);
+    });
+}
+
+var drag_selection = document.createElement("div");
+var drag_selection_area = new Rect(0, 0, 0, 0);
+drag_selection.id = "drag-box";
+builder_interface.appendChild(drag_selection);
+function reset_drag_selection(){
+    position_interface_element(drag_selection, 0, 0);
+    drag_selection.style.height = 0;
+    drag_selection.style.width = 0;
+}
+function update_drag_selection_visuals(){
+    var dimensions = new Rect(0, 0, 0, 0);
+    if(drag_selection_area.height >= 0.0){
+        dimensions.top = drag_selection_area.top;
+        dimensions.height = drag_selection_area.height;
+    } else {
+        dimensions.top = drag_selection_area.top + drag_selection_area.height;
+        dimensions.height = -1.0 * drag_selection_area.height;
+    }
+    if(drag_selection_area.width >= 0.0){
+        dimensions.left = drag_selection_area.left;
+        dimensions.width = drag_selection_area.width;
+    } else {
+        dimensions.left = drag_selection_area.left + drag_selection_area.width;
+        dimensions.width = -1.0 * drag_selection_area.width;
+    }
+    position_interface_element(drag_selection, dimensions.top, dimensions.left);
+    drag_selection.style.height = dimensions.height + "px";
+    drag_selection.style.width = dimensions.width + "px";
+}
 
 var drag_origin = {
     top: 0,
     left: 0
 };
 
+function reset_selection(){
+    curr_selection_type = SELECTION_TYPE.NONE;
+    selected_notes = [];
+    note_offsets = [];
+}
+
 function begin_selection(e){
     var click_box = new Rect(e.clientY, e.clientX, 0, 0);
     
+    switch(curr_selection_type){
+        case SELECTION_TYPE.NONE:
+            // If nothing is selected, make a selection
+            Notes.forEach(function(n){
+                var note_box = n.selectable_area.getBoundingClientRect();
+                if(bounding_box_intersects(click_box, note_box)){
+                    selected_notes.push(n);
+                    curr_selection_type = SELECTION_TYPE.MOVABLE;
+                }
+            });
+        
+            if(selected_notes.length == 0){
+                // If no note was clicked
+                // Start drag-select
+                drag_selection_area.top = e.clientY - interface_bounds.top;
+                drag_selection_area.left = e.clientX - interface_bounds.left;
 
-    Notes.forEach(function(n){
-        var note_box = n.selectable_area.getBoundingClientRect();
-        if(click_box.intersects(note_box)){
-            var offset = {
-                top: note_box.top - e.clientY,
-                left: note_box.left - e.clientX
-            };
-            selected_notes.push(n);
-            note_offsets.push(offset);
-            curr_selection_type = SELECTION_TYPE.CLICK;
-        }
-    });
-
-    if(selected_notes.length == 0){
-        // If no note was clicked
-        // Start drag-select
-        curr_selection_type = SELECTION_TYPE.DRAG;
-        drag_origin.top = e.clientY;
-        drag_origin.left = e.clientX;
+                curr_selection_type = SELECTION_TYPE.DRAG;
+            } else {
+                set_note_offsets(e.clientY - interface_bounds.top, e.clientX - interface_bounds.left);
+            }
+            break;
+        case SELECTION_TYPE.SELECTED:
+            var intersecting = false;
+            selected_notes.forEach(function(n){
+                var note_box = n.selectable_area.getBoundingClientRect();
+                if(bounding_box_intersects(click_box, note_box)){
+                    intersecting = true;
+                }
+            });
+            if(intersecting){
+                // If the click is on one of the currently selected notes
+                // TODO: set note offsets
+                set_note_offsets(e.clientY - interface_bounds.top, e.clientX - interface_bounds.left);
+                curr_selection_type = SELECTION_TYPE.MOVABLE;
+            } else {
+                // Otherwise, reset selection status
+                reset_selection();
+                begin_selection(e);
+            }
+            break;
+        default:
+            break;
     }
 }
 
 function end_selection(e){
     switch(curr_selection_type){
-        case SELECTION_TYPE.CLICK:
-            curr_selection_type = null;
-            selected_notes = [];
-            note_offsets = [];
+        case SELECTION_TYPE.NONE:
+            break;
+        case SELECTION_TYPE.SELECTED:
+            break;
+        case SELECTION_TYPE.MOVABLE:
+            curr_selection_type = SELECTION_TYPE.SELECTED
             break;
         case SELECTION_TYPE.DRAG:
+            // Loop through notes to check for overlap and select them
+            var drag_box = drag_selection.getBoundingClientRect();
+            Notes.forEach(function(n){
+                var note_box = n.selectable_area.getBoundingClientRect();
+                if(bounding_box_intersects(drag_box, note_box)){
+                    selected_notes.push(n);
+                    curr_selection_type = SELECTION_TYPE.SELECTED;
+                }
+            });
+            // If there is no selection after checking
+            if(selected_notes.length == 0){
+                reset_selection();
+            }
+            reset_drag_selection();
             break;
         default:
             console.error("Unknown selection type on mouse move: " + curr_selection_type);
             break;
     }
-    // If selection_type == click
-    // deselect all
-    // Else if selection_type == drag
-    // select all in box
 }
-
 
 builder_interface.addEventListener("mousemove", drag_note);
 function drag_note(e){
-    // switch(curr_selection_type){
-    //     case SELECTION_TYPE.CLICK:
-
-    //         break;
-    //     case SELECTION_TYPE.DRAG:
-    //         break;
-    //     default:
-    //         console.error("Unknown selection type on mouse move: " + curr_selection_type);
-    //         break;
-    // }
-    // If click selection
-    // Move notes like below
-    // Else if drag select
-    // Update drag select visual
-
-    for(let i = 0; i < selected_notes.length; i++){
-        var floating_note_top = e.clientY + note_offsets[i].top + 
-            note_positioning.offset * 0.5 - interface_bounds.top;
-
-        var zeroed_top = floating_note_top - (note_positioning.top);
-        var scaled_top = zeroed_top / note_positioning.offset;
-        var note_top_index = Math.floor(scaled_top);
-        note_top_index = Math.max(note_top_index, 0);
-        position_note(selected_notes[i],
-            note_tops[note_top_index], null);
+    switch(curr_selection_type){
+        case SELECTION_TYPE.MOVABLE:
+            // Move the selected notes
+            for(let i = 0; i < selected_notes.length; i++){
+                var floating_note_top = e.clientY + note_offsets[i].top + 
+                    note_positioning.offset * 0.5 - interface_bounds.top;
+        
+                var zeroed_top = floating_note_top - (note_positioning.top);
+                var scaled_top = zeroed_top / note_positioning.offset;
+                var note_top_index = Math.floor(scaled_top);
+                note_top_index = Math.max(note_top_index, 0);
+                position_note(selected_notes[i],
+                    note_tops[note_top_index], null);
+            }
+            break;
+        case SELECTION_TYPE.SELECTED:
+            break;
+        case SELECTION_TYPE.NONE:
+            break;
+        case SELECTION_TYPE.DRAG:
+            // Update drag selection based on mouse position
+            drag_selection_area.height = (e.clientY - interface_bounds.top - drag_selection_area.top);
+            drag_selection_area.width = (e.clientX - interface_bounds.left - drag_selection_area.left);
+            update_drag_selection_visuals();
+            break;
+        default:
+            console.error("Unknown selection type on mouse move: " + curr_selection_type);
+            break;
     }
 }
 

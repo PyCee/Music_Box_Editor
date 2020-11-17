@@ -79,11 +79,15 @@ builder-buttons > div:hover {
     height: var(--note-selectable-area-size);
     width: var(--note-width);
     margin-top: calc(var(--note-height) - var(--note-selectable-area-size));
-    /* background-color: hsla(0, 100%, 00%, .3);; */
+    /* background-color: hsla(0, 100%, 00%, .3); */
 }
 .bar {
     width: 0px;
     border: 1px solid black;
     border-radius: 2px;
     position: absolute;
+}
+#drag-box {
+    position: absolute;
+    background-color: rgba(25, 0, 255, 0.3);
 }

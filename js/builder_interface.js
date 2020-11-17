@@ -20,3 +20,15 @@ for(let i = 0; i < 5; i++){
     builder_interface.appendChild(element);
     staff_lines.push(element);
 }
+
+
+const note_positioning = {
+    top: staff_positioning.top - (staff_positioning.offset * 0.5),
+    offset: staff_positioning.offset * 0.5
+};
+
+// define valid note tops
+var note_tops = [];
+for(let i = 0; i < 10; i++){
+    note_tops.push(note_positioning.top + note_positioning.offset * i);
+}
