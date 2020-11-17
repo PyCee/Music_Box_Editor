@@ -1,0 +1,89 @@
+:root {
+    --treble-top-offset: 50px;
+    --treble-height: 300px;
+}
+#builder-buttons {
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+#builder-buttons > div {
+    float: left;
+    display: block;
+    color: black;
+    margin: 0px 5px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    text-align: center;
+    padding: 14px 18px;
+    text-decoration: none;
+}
+/* Change color on hover */
+builder-buttons > div:hover {
+    background-color: #ddd;
+    color: black;
+}
+#builder-interface {
+    height: 400px;
+    width: 100%;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+       -khtml-user-select: none; /* Konqueror HTML */
+         -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none; /* Non-prefixed version, currently
+                                    supported by Chrome, Edge, Opera and Firefox */
+}
+#treble-clef {
+    height: var(--treble-height);
+    margin-top: var(--treble-top-offset);
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+.staff-line {
+    position: absolute;
+    border: 1px solid black;
+    --offset: 10px;
+    margin-left: var(--offset);
+    width: calc(100% - (2 * var(--offset)));
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.note {
+    --image-aspect-ratio: 3.2;
+    --note-height: 200px;
+    --note-width: calc(var(--note-height) / var(--image-aspect-ratio));
+    position: absolute;
+    background-image: url("res/quarter-note.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: var(--note-height);
+    width: var(--note-width);
+    transform: translate(0%, -75%);
+}
+.flipped {
+    transform-origin: center 87.5%;
+    transform: rotate(180deg) translate(0px, 75%);
+}
+.note-selectable-area {
+    --note-selectable-area-size: calc(var(--note-width) * 0.8);
+    height: var(--note-selectable-area-size);
+    width: var(--note-width);
+    margin-top: calc(var(--note-height) - var(--note-selectable-area-size));
+    /* background-color: hsla(0, 100%, 00%, .3);; */
+}
+.bar {
+    width: 0px;
+    border: 1px solid black;
+    border-radius: 2px;
+    position: absolute;
+}
