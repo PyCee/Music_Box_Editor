@@ -3,27 +3,18 @@
 builder_interface.addEventListener("mousedown", begin_selection);
 builder_interface.addEventListener("mouseup", end_selection);
 
-const SELECTION_TYPE = {
-    NONE: 'none',
-    SELECTED: 'selected',
-    MOVABLE: 'movable',
-    DRAG: 'drag-select'
-
-};
-var curr_selection_type = SELECTION_TYPE.NONE;
-var selected_notes = [];
-var note_offsets = [];
-
-function set_note_offsets(top, left){
+note_button.addEventListener("mousedown", function(e){
+    // When the user clicks on the note button
+    // Create a new note and prepare it for mouse movement
+    selected_notes = [];
+    var new_note = new Note();
+    position_note(new_note, e.clientY - interface_bounds.top, e.clientX - interface_bounds.left);
+    selected_notes.push(new_note);
     note_offsets = [];
-    selected_notes.forEach(function(n){
-        var offset = {
-            top: n.element.offsetTop - top,
-            left: n.element.offsetLeft - left
-        };
-        note_offsets.push(offset);
-    });
-}
+    note_offsets.push({top: 0, left: 0});
+    curr_selection_type = SELECTION_TYPE.MOVABLE;
+    event.stopPropagation();
+});
 
 var drag_selection = document.createElement("div");
 var drag_selection_area = new Rect(0, 0, 0, 0);
@@ -72,6 +63,7 @@ function begin_selection(e){
     switch(curr_selection_type){
         case SELECTION_TYPE.NONE:
             // If nothing is selected, make a selection
+
             Notes.forEach(function(n){
                 var note_box = n.selectable_area.getBoundingClientRect();
                 if(bounding_box_intersects(click_box, note_box)){
@@ -79,7 +71,6 @@ function begin_selection(e){
                     curr_selection_type = SELECTION_TYPE.MOVABLE;
                 }
             });
-        
             if(selected_notes.length == 0){
                 // If no note was clicked
                 // Start drag-select
@@ -101,7 +92,6 @@ function begin_selection(e){
             });
             if(intersecting){
                 // If the click is on one of the currently selected notes
-                // TODO: set note offsets
                 set_note_offsets(e.clientY - interface_bounds.top, e.clientX - interface_bounds.left);
                 curr_selection_type = SELECTION_TYPE.MOVABLE;
             } else {
@@ -122,7 +112,23 @@ function end_selection(e){
         case SELECTION_TYPE.SELECTED:
             break;
         case SELECTION_TYPE.MOVABLE:
-            curr_selection_type = SELECTION_TYPE.SELECTED
+
+            // Filter out any notes that are outisde of the bounds
+            selected_notes.forEach(function(n){
+                if(n.element.offsetTop < note_tops[0] || 
+                    n.element.offsetTop > note_tops[note_tops.length - 1]){
+                    // Delete all references to n
+                    builder_interface.removeChild(n.element);
+                }
+            });
+            function is_note_position_valid(n){
+                return n.element.offsetTop > note_tops[0] && 
+                n.element.offsetTop < note_tops[note_tops.length - 1];
+            }
+            Notes = Notes.filter(is_note_position_valid);
+            selected_notes = selected_notes.filter(is_note_position_valid);
+            
+            curr_selection_type = SELECTION_TYPE.SELECTED;
             break;
         case SELECTION_TYPE.DRAG:
             // Loop through notes to check for overlap and select them
@@ -158,9 +164,18 @@ function drag_note(e){
                 var zeroed_top = floating_note_top - (note_positioning.top);
                 var scaled_top = zeroed_top / note_positioning.offset;
                 var note_top_index = Math.floor(scaled_top);
-                note_top_index = Math.max(note_top_index, 0);
+
+                var note_top = 0;
+                if(note_top_index < 0 || note_top_index >= note_tops.length){
+                    note_top = floating_note_top;
+                } else {
+                    note_top = note_tops[note_top_index];
+                }
+
+                var note_left = e.clientX - interface_bounds.left;
+
                 position_note(selected_notes[i],
-                    note_tops[note_top_index], null);
+                    note_top, note_left);
             }
             break;
         case SELECTION_TYPE.SELECTED:

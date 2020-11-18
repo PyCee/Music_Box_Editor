@@ -24,14 +24,14 @@ class Note {
 };
 
 // TMP: make test notes
-for(let i = 0; i < note_tops.length; i++){
+for(let i = 5; i < note_tops.length; i++){
     var note = new Note();
     position_note(note, note_tops[i], i * 75 + 130);
 }
 // /TMP
 
 function position_note(note, top, left){
-    if(top <= note_tops[4]){
+    if(top <= note_tops[3]){
         note.upside_down();
     } else {
         note.rightside_up();

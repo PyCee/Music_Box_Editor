@@ -34,6 +34,35 @@ builder-buttons > div:hover {
     position: relative;
     overflow: hidden;
 }
+.interface-draggable {
+    margin: 10px;
+    text-align: center;
+    height: 50px;
+    width: 50px;
+    border: 1px solid black;
+    border-radius: 10px;
+    float: left;
+}
+#note-button {
+    overflow: hidden;
+    position: absolute;
+    left: 10px;
+}
+#note-button > img {
+    height: 80%;
+    margin-top: 10%;
+}
+#delete-button {
+    position: absolute;
+    left: 70px;
+
+}
+#delete-button > p {
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 40%;
+}
 .noselect {
     -webkit-touch-callout: none; /* iOS Safari */
       -webkit-user-select: none; /* Safari */
@@ -60,7 +89,7 @@ builder-buttons > div:hover {
 }
 .note {
     --image-aspect-ratio: 3.2;
-    --note-height: 200px;
+    --note-height: 180px;
     --note-width: calc(var(--note-height) / var(--image-aspect-ratio));
     position: absolute;
     background-image: url("res/quarter-note.png");
