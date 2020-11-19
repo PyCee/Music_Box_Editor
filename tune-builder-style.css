@@ -1,6 +1,6 @@
 :root {
-    --treble-top-offset: 50px;
-    --treble-height: 300px;
+    --treble-top-offset: 100px;
+    --treble-height: 200px;
 }
 #builder-buttons {
     overflow: hidden;
@@ -89,7 +89,8 @@ builder-buttons > div:hover {
 }
 .note {
     --image-aspect-ratio: 3.2;
-    --note-height: 180px;
+    /* --note-height: 180px; */
+    --note-height: calc(var(--treble-height) * 0.14 / 0.24);
     --note-width: calc(var(--note-height) / var(--image-aspect-ratio));
     position: absolute;
     background-image: url("res/quarter-note.png");

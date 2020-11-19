@@ -17,12 +17,13 @@ note_button.addEventListener("mousedown", function(e){
     event.stopPropagation();
 });
 
-// TODO: also do this on press delete or backspace button(s)
 function delete_selected_notes_event(e){
     delete_selected_notes();
-    e.stopPropagation();
 }
-delete_button.addEventListener("mousedown", delete_selected_notes_event);
+delete_button.addEventListener("mousedown", function(e){
+    delete_selected_notes_event(e);
+    e.stopPropagation();
+});
 document.addEventListener("keydown", handle_key_down);  //or however you are calling your method
 function handle_key_down(e)
 {

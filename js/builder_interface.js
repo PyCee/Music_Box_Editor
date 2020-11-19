@@ -13,9 +13,10 @@ function position_interface_element(element, top, left){
         element.style.left = left + "px";
 }
 
+var treble_bounds = document.getElementById("treble-clef").getBoundingClientRect();
 const staff_positioning = {
-    top: 107,
-    offset: 43
+    top: (treble_bounds.top - interface_bounds.top) + (treble_bounds.height * 0.20),
+    offset: treble_bounds.height * 0.14
 };
 var staff_lines = [];
 for(let i = 0; i < 5; i++){
@@ -30,7 +31,7 @@ const bar_positioning = {
     top: staff_positioning.top,
     top_offset: 0,
     left: 200,
-    left_offset: 400
+    left_offset: 300
 };
 var bar_lefts = [];
 for(let i = 0; i < 3; i++){
@@ -53,7 +54,6 @@ var note_width;
 var extra_bar_width = bar_positioning.left_offset - (note_width * 4);
 var note_initial_left_offset = bar_positioning.left + (extra_bar_width / 8.0);
 var note_offset = note_width + (extra_bar_width / 4.0);
-
 
 const note_positioning = {
     top: staff_positioning.top - (staff_positioning.offset * 0.5),
