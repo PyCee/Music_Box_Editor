@@ -24,21 +24,39 @@ delete_button.addEventListener("mousedown", function(e){
     delete_selected_notes_event(e);
     e.stopPropagation();
 });
+function offset_selected_notes(top_offset, left_offset){
+    selected_notes.forEach(function(n){
+        var top = (top_offset != null) ? n.element.offsetTop - top_offset : null;
+        var left = (left_offset != null) ? n.element.offsetLeft - left_offset : null;
+        position_note(n, top, left, bounded=true);
+    });
+}
 document.addEventListener("keydown", handle_key_down);  //or however you are calling your method
 function handle_key_down(e)
 {
-   var KeyID = e.keyCode;
-   switch(KeyID)
-   {
-      case 8: /* backspace */
-        delete_selected_notes_event(e);
-        e.preventDefault();
-      break; 
-      case 46: /* delete */
-        delete_selected_notes_event(e);
-      break;
-      default:
-      break;
+    var KeyID = e.keyCode;
+    switch(KeyID){
+        case 8: /* backspace */
+            delete_selected_notes_event(e);
+            e.preventDefault();
+            break; 
+        case 46: /* delete */
+            delete_selected_notes_event(e);
+            break;
+        case 37: /* left arrow */
+            offset_selected_notes(null, note_positioning.left_offset);
+            break;
+        case 38: /* up arrow */
+            offset_selected_notes(note_positioning.top_offset, null);
+            break;
+        case 39: /* right arrow */
+            offset_selected_notes(null, -1.0 * note_positioning.left_offset);
+            break;
+        case 40: /* down arrow */
+            offset_selected_notes(-1.0 * note_positioning.top_offset, null);
+            break;
+        default:
+            break;
    }
 }
 
@@ -165,45 +183,32 @@ function drag_note(e){
             // Move the selected notes
             for(let i = 0; i < selected_notes.length; i++){
 
-                // TODO: combine align_note_top/left
-
-                function align_note_top(floating_note_top){
+                function align_note_dimension(floating_value, zero_value, offset_value, value_array){
                     // Calculate note position clamped to valid positions
                     // Returns null when floating_note_top is out of bounds
-
-                    var zeroed_top = floating_note_top - (note_positioning.top);
-                    var scaled_top = zeroed_top / note_positioning.top_offset;
-                    var note_top_index = Math.floor(scaled_top);
-                    if(note_top_index >= 0 && note_top_index < note_tops.length){
-                        return note_tops[note_top_index];
+                    var zeroed_value = floating_value - zero_value;
+                    var scaled_value = zeroed_value / offset_value;
+                    var index = Math.floor(scaled_value);
+                    if(index >= 0 && index < value_array.length){
+                        return value_array[index];
                     } else {
                         return null;
                     }
                 }
+                
                 var floating_note_top = e.clientY + note_offsets[i].top + 
                     note_positioning.top_offset * 0.5 - interface_bounds.top;
-                var note_top = align_note_top(floating_note_top);
+                var note_top = align_note_dimension(floating_note_top, 
+                    note_positioning.top, note_positioning.top_offset, note_tops);
                 if(note_top == null){
                     note_top = floating_note_top;
                 }
 
-                function align_note_left(floating_note_left){
-                    // Calculate note position clamped to valid positions
-                    // Returns null when floating_note_top is out of bounds
-
-                    var zeroed_left = floating_note_left - (note_positioning.left);
-                    var scaled_left = zeroed_left / note_positioning.left_offset;
-                    var note_left_index = Math.floor(scaled_left);
-                    if(note_left_index >= 0 && note_left_index < note_lefts.length){
-                        return note_lefts[note_left_index];
-                    } else {
-                        return null;
-                    }
-                }
-
+                // TODO: align left or not depending on note.align_to_grid
                 var floating_note_left = e.clientX + note_offsets[i].left + 
                 note_positioning.left_offset * 0.5 - interface_bounds.left;
-                var note_left = align_note_left(floating_note_left);
+                var note_left = align_note_dimension(floating_note_left, 
+                    note_positioning.left, note_positioning.left_offset, note_lefts);
                 if(note_left == null){
                     note_left = floating_note_left;
                 }

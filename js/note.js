@@ -2,6 +2,8 @@ var Notes = [];
 
 class Note {
     constructor(){
+        this.locked_to_grid = true;
+        
         this.element = document.createElement("div");
         this.element.classList.add("note", "noselect");
         builder_interface.appendChild(this.element);
@@ -29,11 +31,17 @@ class Note {
     }
 };
 
-function position_note(note, top, left){
+function position_note(note, top, left, bounded=false){
     if(top <= note_tops[3]){
         note.upside_down();
     } else {
         note.rightside_up();
+    }
+    if(bounded){
+        if(top != null)
+            top = Math.min(Math.max(top, note_tops[0]), note_tops[note_tops.length-1]);
+        if(left != null)
+            left = Math.min(Math.max(left, note_lefts[0]), note_lefts[note_lefts.length-1]);
     }
     position_interface_element(note.element, top, left);
 }
