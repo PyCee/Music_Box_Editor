@@ -26,15 +26,50 @@ for(let i = 0; i < 5; i++){
     staff_lines.push(element);
 }
 
+const bar_positioning = {
+    top: staff_positioning.top,
+    top_offset: 0,
+    left: 200,
+    left_offset: 400
+};
+var bar_lefts = [];
+for(let i = 0; i < 3; i++){
+    bar_lefts.push(bar_positioning.left + bar_positioning.left_offset * i);
+}
+for(let i = 0; i < 3; i++){
+    var bar = document.createElement("div");
+    bar.classList.add("bar");
+    bar.style.height = staff_positioning.offset * 4 + "px"
+    builder_interface.appendChild(bar);
+    position_interface_element(bar, bar_positioning.top, bar_lefts[i]);
+}
+var note_width;
+{
+    var tmp_note = new Note();
+    note_width = tmp_note.element.offsetWidth;
+    builder_interface.removeChild(tmp_note.element);
+    tmp_note.remove();
+}
+var extra_bar_width = bar_positioning.left_offset - (note_width * 4);
+var note_initial_left_offset = bar_positioning.left + (extra_bar_width / 8.0);
+var note_offset = note_width + (extra_bar_width / 4.0);
+
+
 const note_positioning = {
     top: staff_positioning.top - (staff_positioning.offset * 0.5),
-    offset: staff_positioning.offset * 0.5
+    top_offset: staff_positioning.offset * 0.5,
+    left: note_initial_left_offset,
+    left_offset: note_offset
 };
 
 // define valid note tops
 var note_tops = [];
 for(let i = 0; i < 10; i++){
-    note_tops.push(note_positioning.top + note_positioning.offset * i);
+    note_tops.push(note_positioning.top + note_positioning.top_offset * i);
+}
+var note_lefts = [];
+for(let i = 0; i < 10; i++){
+    note_lefts.push(note_positioning.left + note_positioning.left_offset * i);
 }
 
 const SELECTION_TYPE = {
@@ -48,7 +83,6 @@ var curr_selection_type = SELECTION_TYPE.NONE;
 var selected_notes = [];
 
 var note_offsets = [];
-
 function set_note_offsets(top, left){
     note_offsets = [];
     selected_notes.forEach(function(n){
@@ -72,7 +106,6 @@ function deselect_note(n){
     n.deselect();
     selected_notes.splice(selected_notes.indexOf(n), 1);
 }
-
 function reset_selection(){
     curr_selection_type = SELECTION_TYPE.NONE;
     selected_notes.forEach(function(n){

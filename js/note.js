@@ -13,7 +13,7 @@ class Note {
         Notes.push(this);
     }
     remove(){
-        Notes.remove(this);
+        Notes.splice(Notes.indexOf(this), 1);
     }
     upside_down(){
         this.element.classList.add("flipped");

@@ -18,10 +18,28 @@ note_button.addEventListener("mousedown", function(e){
 });
 
 // TODO: also do this on press delete or backspace button(s)
-delete_button.addEventListener("mousedown", function(e){
+function delete_selected_notes_event(e){
     delete_selected_notes();
-    event.stopPropagation();
-});
+    e.stopPropagation();
+}
+delete_button.addEventListener("mousedown", delete_selected_notes_event);
+document.addEventListener("keydown", handle_key_down);  //or however you are calling your method
+function handle_key_down(e)
+{
+   var KeyID = e.keyCode;
+   switch(KeyID)
+   {
+      case 8: /* backspace */
+        delete_selected_notes_event(e);
+        e.preventDefault();
+      break; 
+      case 46: /* delete */
+        delete_selected_notes_event(e);
+      break;
+      default:
+      break;
+   }
+}
 
 var drag_selection = document.createElement("div");
 var drag_selection_area = new Rect(0, 0, 0, 0);
@@ -57,7 +75,6 @@ function update_drag_selection_visuals(){
         drag_selection_area.top, drag_selection_area.height);
     var hori_dimension = calculate_drag_selection_dimensions(
         drag_selection_area.left, drag_selection_area.width);
-    console.log(vert_dimension);
     position_interface_element(drag_selection, vert_dimension.tmp_origin, hori_dimension.tmp_origin);
     drag_selection.style.height = vert_dimension.tmp_length + "px";
     drag_selection.style.width = hori_dimension.tmp_length + "px";
@@ -147,23 +164,48 @@ function drag_note(e){
             // Move the selected notes
             for(let i = 0; i < selected_notes.length; i++){
 
-                // Calculate note position clamped to valid positions
-                var floating_note_top = e.clientY + note_offsets[i].top + 
-                    note_positioning.offset * 0.5 - interface_bounds.top;
-        
-                var zeroed_top = floating_note_top - (note_positioning.top);
-                var scaled_top = zeroed_top / note_positioning.offset;
-                var note_top_index = Math.floor(scaled_top);
+                // TODO: combine align_note_top/left
 
-                var note_top = 0;
-                if(note_top_index < 0 || note_top_index >= note_tops.length){
+                function align_note_top(floating_note_top){
+                    // Calculate note position clamped to valid positions
+                    // Returns null when floating_note_top is out of bounds
+
+                    var zeroed_top = floating_note_top - (note_positioning.top);
+                    var scaled_top = zeroed_top / note_positioning.top_offset;
+                    var note_top_index = Math.floor(scaled_top);
+                    if(note_top_index >= 0 && note_top_index < note_tops.length){
+                        return note_tops[note_top_index];
+                    } else {
+                        return null;
+                    }
+                }
+                var floating_note_top = e.clientY + note_offsets[i].top + 
+                    note_positioning.top_offset * 0.5 - interface_bounds.top;
+                var note_top = align_note_top(floating_note_top);
+                if(note_top == null){
                     note_top = floating_note_top;
-                } else {
-                    note_top = note_tops[note_top_index];
                 }
 
-                var note_left = e.clientX + note_offsets[i].left - interface_bounds.left;
+                function align_note_left(floating_note_left){
+                    // Calculate note position clamped to valid positions
+                    // Returns null when floating_note_top is out of bounds
 
+                    var zeroed_left = floating_note_left - (note_positioning.left);
+                    var scaled_left = zeroed_left / note_positioning.left_offset;
+                    var note_left_index = Math.floor(scaled_left);
+                    if(note_left_index >= 0 && note_left_index < note_lefts.length){
+                        return note_lefts[note_left_index];
+                    } else {
+                        return null;
+                    }
+                }
+
+                var floating_note_left = e.clientX + note_offsets[i].left + 
+                note_positioning.left_offset * 0.5 - interface_bounds.left;
+                var note_left = align_note_left(floating_note_left);
+                if(note_left == null){
+                    note_left = floating_note_left;
+                }
                 position_note(selected_notes[i],
                     note_top, note_left);
             }
@@ -183,10 +225,3 @@ function drag_note(e){
             break;
     }
 }
-
-// TODO: more with music bars
-var bar = document.createElement("div");
-bar.classList.add("bar");
-bar.style.height = staff_positioning.offset * 4 + "px"
-builder_interface.appendChild(bar);
-position_interface_element(bar, staff_positioning.top, 425);

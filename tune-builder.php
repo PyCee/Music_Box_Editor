@@ -20,8 +20,8 @@
 </div>
 
 <script src="js/rect.js"></script>
-<script src="js/builder_interface.js"></script>
 <script src="js/note.js"></script>
+<script src="js/builder_interface.js"></script>
 <script src="js/note-builder.js"></script>
 <script>
 $(document).ready(function(){
