@@ -21,14 +21,13 @@ class Note {
     rightside_up(){
         this.element.classList.remove("flipped");
     }
+    select(){
+        this.element.classList.add("note-selection-visual");
+    }
+    deselect(){
+        this.element.classList.remove("note-selection-visual");
+    }
 };
-
-// TMP: make test notes
-for(let i = 5; i < note_tops.length; i++){
-    var note = new Note();
-    position_note(note, note_tops[i], i * 75 + 130);
-}
-// /TMP
 
 function position_note(note, top, left){
     if(top <= note_tops[3]){

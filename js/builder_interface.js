@@ -4,6 +4,7 @@ var builder_interface = document.getElementById("builder-interface");
 var interface_bounds = builder_interface.getBoundingClientRect();
 
 var note_button = document.getElementById("note-button");
+var delete_button = document.getElementById("delete-button");
 
 function position_interface_element(element, top, left){
     if(top != null)
@@ -57,4 +58,49 @@ function set_note_offsets(top, left){
         };
         note_offsets.push(offset);
     });
+}
+function set_relative_note_offsets(e){
+    // Set note offsets relative to mouse position from event (e)
+    set_note_offsets(e.clientY - interface_bounds.top, e.clientX - interface_bounds.left);
+}
+
+function select_note(n){
+    selected_notes.push(n);
+    n.select();
+}
+function deselect_note(n){
+    n.deselect();
+    selected_notes.splice(selected_notes.indexOf(n), 1);
+}
+
+function reset_selection(){
+    curr_selection_type = SELECTION_TYPE.NONE;
+    selected_notes.forEach(function(n){
+        n.deselect();
+    });
+    selected_notes = [];
+    note_offsets = [];
+}
+function delete_selected_notes(){
+    selected_notes.forEach(function(n){
+        builder_interface.removeChild(n.element);
+        Notes.splice(Notes.indexOf(n), 1);
+    });
+    reset_selection();
+}
+function delete_notes_out_of_bounds(){
+    // Filter out any notes that are outisde of the bounds 
+    //  removes from builder_interface.children, Notes, and selected_notes
+    
+    function is_note_in_bounds(n){
+        return n.element.offsetTop > note_tops[0] && 
+        n.element.offsetTop < note_tops[note_tops.length - 1];
+    }
+    selected_notes.forEach(function(n){
+        if(!is_note_in_bounds(n)){
+            builder_interface.removeChild(n.element);
+        }
+    });
+    Notes = Notes.filter(is_note_in_bounds);
+    selected_notes = selected_notes.filter(is_note_in_bounds);
 }
