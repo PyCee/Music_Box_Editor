@@ -23,13 +23,14 @@
 <script src="js/note.js"></script>
 <script src="js/builder_interface.js"></script>
 <script src="js/note-builder.js"></script>
+<script src="js/play_tune.js"></script>
 <script>
 $(document).ready(function(){
     $("#note-icon").on('dragstart', function(event) { event.preventDefault(); });
     $("#treble-clef").on('dragstart', function(event) { event.preventDefault(); });
     
     $("#play-tune-button").click(function(){
-        console.log("play");
+        play_tune();
     });
     $("#save-tune-button").click(function(){
         console.log("save");

@@ -30,6 +30,7 @@ function offset_selected_notes(top_offset, left_offset){
         var left = (left_offset != null) ? n.element.offsetLeft - left_offset : null;
         position_note(n, top, left, bounded=true);
     });
+
 }
 document.addEventListener("keydown", handle_key_down);  //or however you are calling your method
 function handle_key_down(e)
